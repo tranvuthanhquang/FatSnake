@@ -1,5 +1,3 @@
-
-
 # Importing the pygame library
 import pygame
 import random
@@ -9,19 +7,19 @@ import random
 pygame.init()
 
 # Colors in RGB format for pygame
-white = (255,255,255)
-black = (0,0,0)
-red = (255,0,0)
-green = (91,123,249)
-blue = (0,0,255)
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+green = (91, 123, 249)
+blue = (0, 0, 255)
 
 # Game window size
 display_width = 800
 display_height = 600
 
 # Game window
-gameDisplay = pygame.display.set_mode((display_width,display_height))
-pygame.display.set_caption('DataFlair - Snake Game')
+gameDisplay = pygame.display.set_mode((display_width, display_height))
+pygame.display.set_caption("DataFlair - Snake Game")
 
 # Clock for fps and speed of snake
 clock = pygame.time.Clock()
@@ -33,17 +31,17 @@ snake_block = 40
 snake_speed = 3
 
 # Font style and size
-smallfont = pygame.font.SysFont("comicsansms",25)
-medfont = pygame.font.SysFont("comicsansms",50)
-largefont = pygame.font.SysFont("comicsansms",80)
+smallfont = pygame.font.SysFont("comicsansms", 25)
+medfont = pygame.font.SysFont("comicsansms", 50)
+largefont = pygame.font.SysFont("comicsansms", 80)
 
 # Images
-snake_head_image = pygame.image.load('E:/AI_2023/snake-game/Code - snake Game/head_up.png')
-apple_image = pygame.image.load('E:/AI_2023/snake-game/Code - snake Game/apple.png')
+snake_head_image = pygame.image.load("snake-game\Code - snake-Game\head_up.png")
+apple_image = pygame.image.load("snake-game\Code - snake-Game\apple.png")
+
 
 # Function to pause the game and display message
 def pause():
-
     # Paused variable
     paused = True
 
@@ -58,7 +56,6 @@ def pause():
     # and wait for user input
     while paused:
         for event in pygame.event.get():
-
             # If user clicks on the close button
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -77,31 +74,31 @@ def pause():
         # Game clock
         clock.tick(5)
 
+
 # Function to display score
 def score(score):
-    text = smallfont.render("Score: "+str(score),True,black)
-    gameDisplay.blit(text,[0,0])
+    text = smallfont.render("Score: " + str(score), True, black)
+    gameDisplay.blit(text, [0, 0])
+
 
 # Function to generate random apple
 def randAppleGen():
-    randAppleX = round(random.randrange(0,display_width - snake_block)/10.0)*10.0
-    randAppleY = round(random.randrange(0,display_height - snake_block)/10.0)*10.0
+    randAppleX = round(random.randrange(0, display_width - snake_block) / 10.0) * 10.0
+    randAppleY = round(random.randrange(0, display_height - snake_block) / 10.0) * 10.0
 
-    return randAppleX,randAppleY
+    return randAppleX, randAppleY
 
-# Function to display controls 
+
+# Function to display controls
 # on screen when game starts
 def game_intro():
-
     # Variable to start the game
     intro = True
-    
+
     # Loop to display controls
     while intro:
-
         # Loop to get all the events
         for event in pygame.event.get():
-
             # If user clicks on the close button
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -125,55 +122,55 @@ def game_intro():
         display_message("The more apples you eat, the longer you get", black, 10)
         display_message("If you run into yourself, or the edges, you die!", black, 50)
         display_message("Press C to play, P to pause or Q to quit.", black, 180)
-    
+
         pygame.display.update()
         clock.tick(15)
 
 
 # Function to display snake on screen
-def snake(snake_block,snake_list):
-
+def snake(snake_block, snake_list):
     # Displaying the snake head in the direction
     if direction == "right":
-        head = pygame.transform.rotate(snake_head_image,270)
+        head = pygame.transform.rotate(snake_head_image, 270)
     if direction == "left":
-        head = pygame.transform.rotate(snake_head_image,90)
+        head = pygame.transform.rotate(snake_head_image, 90)
     if direction == "up":
         head = snake_head_image
     if direction == "down":
-        head = pygame.transform.rotate(snake_head_image,180)
-    
-    gameDisplay.blit(head,(snake_list[-1][0],snake_list[-1][1]))
-    
+        head = pygame.transform.rotate(snake_head_image, 180)
+
+    gameDisplay.blit(head, (snake_list[-1][0], snake_list[-1][1]))
+
     # Displaying the snake body
     for XnY in snake_list[:-1]:
-        pygame.draw.rect(gameDisplay,green,[XnY[0],XnY[1],snake_block,snake_block])
+        pygame.draw.rect(gameDisplay, green, [XnY[0], XnY[1], snake_block, snake_block])
+
 
 # Function to display message on screen
 # in different sizes
-def text_objects(text,color,size):
+def text_objects(text, color, size):
     if size == "small":
-        textSurface = smallfont.render(text,True,color)
+        textSurface = smallfont.render(text, True, color)
     elif size == "medium":
-        textSurface = medfont.render(text,True,color)
+        textSurface = medfont.render(text, True, color)
     elif size == "large":
-        textSurface = largefont.render(text,True,color)
+        textSurface = largefont.render(text, True, color)
 
-    return textSurface,textSurface.get_rect()
+    return textSurface, textSurface.get_rect()
+
 
 # Function to display message on screen
-def display_message(message,color,y_change=0,text_size="small"):
-    textSurf,textRect = text_objects(message,color,text_size)
-    textRect.center = (display_width/2),(display_height/2)+y_change
-    gameDisplay.blit(textSurf,textRect)
+def display_message(message, color, y_change=0, text_size="small"):
+    textSurf, textRect = text_objects(message, color, text_size)
+    textRect.center = (display_width / 2), (display_height / 2) + y_change
+    gameDisplay.blit(textSurf, textRect)
 
 
 # Main function of the game
 def gameLoop():
-
     # Variable to keep track of direction of snake
     global direction
-    direction = 'right'
+    direction = "right"
 
     # Variable to exit the game
     gameExit = False
@@ -181,10 +178,9 @@ def gameLoop():
     # Variable to end the game
     gameOver = False
 
-
     # Variables to keep track of snake position
-    lead_x = display_width/2
-    lead_y = display_height/2
+    lead_x = display_width / 2
+    lead_y = display_height / 2
 
     # Variables to keep track of snake movement
     lead_x_change = 10
@@ -195,26 +191,25 @@ def gameLoop():
     snakeLength = 1
 
     # Generating random apple
-    randAppleX,randAppleY = randAppleGen()
+    randAppleX, randAppleY = randAppleGen()
 
     # Loop to run the game until user exits
     while not gameExit:
-
         # Loop to end the game if user dies
         while gameOver == True:
-
             # Background color
             gameDisplay.fill(white)
 
             # Displaying the message that user died
             # and asking user to play again
-            display_message("Game over",red, -50, size="large")
-            display_message("Press C to play again or Q to quit", black, 50, size="medium")
+            display_message("Game over", red, -50, size="large")
+            display_message(
+                "Press C to play again or Q to quit", black, 50, size="medium"
+            )
             pygame.display.update()
 
             # Loop to get all the events
             for event in pygame.event.get():
-
                 # If user clicks on the close button
                 if event.type == pygame.QUIT:
                     gameOver = False
@@ -259,7 +254,12 @@ def gameLoop():
                     pause()
 
         # If snake goes out of the screen
-        if lead_x >= display_width or lead_x < 0 or lead_y >= display_height or lead_y < 0:
+        if (
+            lead_x >= display_width
+            or lead_x < 0
+            or lead_y >= display_height
+            or lead_y < 0
+        ):
             gameOver = True
 
         # Changing the position of snake
@@ -270,7 +270,7 @@ def gameLoop():
         gameDisplay.fill(white)
 
         # Displaying the apple
-        gameDisplay.blit(apple_image,(randAppleX,randAppleY))
+        gameDisplay.blit(apple_image, (randAppleX, randAppleY))
 
         # Storing the snake head in a list
         snakeHead = []
@@ -286,18 +286,16 @@ def gameLoop():
 
         # Loop to check if snake head collides with any segment
         for eachSegment in snakeList[:-1]:
-
             # If snake head collides with any segment
             if eachSegment == snakeHead:
-
                 # End the game
                 gameOver = True
 
         # Displaying the snake
-        snake(snake_block,snakeList)
+        snake(snake_block, snakeList)
 
         # Displaying the score
-        score(snakeLength-1)
+        score(snakeLength - 1)
 
         # Updating the display
         pygame.display.update()
@@ -306,12 +304,18 @@ def gameLoop():
         # If it does, generate a new apple and increase the snake length
         if lead_x >= randAppleX and lead_x <= randAppleX + snake_block:
             if lead_y >= randAppleY and lead_y <= randAppleY + snake_block:
-                randAppleX,randAppleY = randAppleGen()
+                randAppleX, randAppleY = randAppleGen()
                 snakeLength += 1
-                
-        elif lead_x + snake_block >= randAppleX and lead_x + snake_block <= randAppleX + snake_block:
-            if lead_y + snake_block >= randAppleY and lead_y + snake_block <= randAppleY + snake_block:
-                randAppleX,randAppleY = randAppleGen()
+
+        elif (
+            lead_x + snake_block >= randAppleX
+            and lead_x + snake_block <= randAppleX + snake_block
+        ):
+            if (
+                lead_y + snake_block >= randAppleY
+                and lead_y + snake_block <= randAppleY + snake_block
+            ):
+                randAppleX, randAppleY = randAppleGen()
                 snakeLength += 1
 
         # Setting the frame rate
@@ -325,5 +329,3 @@ def gameLoop():
 # Calling the main function
 game_intro()
 gameLoop()
-
-
