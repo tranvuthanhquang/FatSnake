@@ -179,8 +179,8 @@ def gameLoop():
     gameOver = False
 
     # Variables to keep track of snake position
-    lead_x = display_width / 2
-    lead_y = display_height / 2
+    lead_x = display_width / 3
+    lead_y = display_height * 2 / 3
 
     # Variables to keep track of snake movement
     lead_x_change = 10
@@ -188,7 +188,7 @@ def gameLoop():
 
     # List to keep track of snake length
     snakeList = []
-    snakeLength = 3
+    snakeLength = 1
 
     # Generating random apple
     randAppleX, randAppleY = randAppleGen()
