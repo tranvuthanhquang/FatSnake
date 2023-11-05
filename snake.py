@@ -15,7 +15,7 @@ blue = (0, 0, 255)
 
 # Game window size
 display_width = 800
-display_height = 600
+display_height = 800
 
 # Game window
 gameDisplay = pygame.display.set_mode((display_width, display_height))
@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 snake_block = 40
 
 # Snake speed
-snake_speed = 3
+snake_speed = 5
 
 # Font style and size
 smallfont = pygame.font.SysFont("comicsansms", 25)
@@ -36,8 +36,8 @@ medfont = pygame.font.SysFont("comicsansms", 50)
 largefont = pygame.font.SysFont("comicsansms", 80)
 
 # Images
-snake_head_image = pygame.image.load("snake-game\Code - snake-Game\head_up.png")
-apple_image = pygame.image.load("snake-game\Code - snake-Game\apple.png")
+snake_head_image = pygame.image.load("head_up.png")
+apple_image = pygame.image.load("apple.png")
 
 
 # Function to pause the game and display message
@@ -131,7 +131,7 @@ def game_intro():
 def snake(snake_block, snake_list):
     # Displaying the snake head in the direction
     if direction == "right":
-        head = pygame.transform.rotate(snake_head_image, 270)
+        head = pygame.transform.rotate(snake_head_image, -90)
     if direction == "left":
         head = pygame.transform.rotate(snake_head_image, 90)
     if direction == "up":
@@ -188,7 +188,7 @@ def gameLoop():
 
     # List to keep track of snake length
     snakeList = []
-    snakeLength = 1
+    snakeLength = 3
 
     # Generating random apple
     randAppleX, randAppleY = randAppleGen()
