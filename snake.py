@@ -14,8 +14,8 @@ green = (91, 123, 249)
 blue = (0, 0, 255)
 
 # Game window size
-display_width = 1000
-display_height = 1000
+display_width = 1500
+display_height = 1500
 
 # Game window
 gameDisplay = pygame.display.set_mode((display_width, display_height))
@@ -65,7 +65,7 @@ def pause():
             # and if presss Q, quit the game
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
-                    pygame.quit()``
+                    pygame.quit()
                     quit()
 
                 elif event.key == pygame.K_c:
