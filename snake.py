@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 snake_block = 40
 
 # Snake speed
-snake_speed = 5
+snake_speed = 50
 
 # Font style and size
 smallfont = pygame.font.SysFont("comicsansms", 25)
@@ -65,7 +65,7 @@ def pause():
             # and if presss Q, quit the game
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
-                    pygame.quit()
+                    pygame.quit()``
                     quit()
 
                 elif event.key == pygame.K_c:
