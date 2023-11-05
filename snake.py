@@ -234,19 +234,19 @@ def gameLoop():
             # change the direction of snake
             # and pause the game if user presses P
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT and direction != "right":
                     direction = "left"
                     lead_x_change = -snake_block
                     lead_y_change = 0
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT and direction != "left":
                     direction = "right"
                     lead_x_change = snake_block
                     lead_y_change = 0
-                elif event.key == pygame.K_UP:
+                elif event.key == pygame.K_UP and direction != "down":
                     direction = "up"
                     lead_y_change = -snake_block
                     lead_x_change = 0
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN and direction != "up":
                     direction = "down"
                     lead_y_change = snake_block
                     lead_x_change = 0
