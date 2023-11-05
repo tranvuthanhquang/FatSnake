@@ -28,7 +28,7 @@ clock = pygame.time.Clock()
 snake_block = 40
 
 # Snake speed
-snake_speed = 50
+snake_speed = 40
 
 # Font style and size
 smallfont = pygame.font.SysFont("comicsansms", 25)
