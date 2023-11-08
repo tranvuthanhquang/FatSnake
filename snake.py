@@ -1,331 +1,435 @@
-# Importing the pygame library
 import pygame
-import random
+from settings import *
+from copy import deepcopy
+from random import randrange
 
 
-# Initialize pygame
-pygame.init()
+# Lớp về tất cả các ô vuông
+class Square:
+    # khởi tạo
+    def __init__(self, pos, surface, is_apple=False):
+        self.pos = pos
+        self.surface = surface
+        self.is_apple = is_apple
+        self.is_tail = False
+        self.dir = [-1, 0]  # hướng [x, y]
 
-# Colors in RGB format for pygame
-white = (255, 255, 255)
-black = (0, 0, 0)
-red = (255, 0, 0)
-green = (91, 123, 249)
-blue = (0, 0, 255)
+        if self.is_apple:
+            self.dir = [0, 0]
 
-# Game window size
-display_width = 1500
-display_height = 1500
+    def draw(self, clr=SNAKE_CLR):
+        x, y = self.pos[0], self.pos[1]
+        ss, gs = SQUARE_SIZE, GAP_SIZE
 
-# Game window
-gameDisplay = pygame.display.set_mode((display_width, display_height))
-pygame.display.set_caption("DataFlair - Snake Game")
+        if self.dir == [-1, 0]:
+            if self.is_tail:
+                pygame.draw.rect(
+                    self.surface,
+                    clr,
+                    (x * ss + gs, y * ss + gs, ss - 2 * gs, ss - 2 * gs),
+                )
+            else:
+                pygame.draw.rect(
+                    self.surface, clr, (x * ss + gs, y * ss + gs, ss, ss - 2 * gs)
+                )
 
-# Clock for fps and speed of snake
-clock = pygame.time.Clock()
+        if self.dir == [1, 0]:
+            if self.is_tail:
+                pygame.draw.rect(
+                    self.surface,
+                    clr,
+                    (x * ss + gs, y * ss + gs, ss - 2 * gs, ss - 2 * gs),
+                )
+            else:
+                pygame.draw.rect(
+                    self.surface, clr, (x * ss - gs, y * ss + gs, ss, ss - 2 * gs)
+                )
 
-# Snake block size
-snake_block = 40
+        if self.dir == [0, 1]:
+            if self.is_tail:
+                pygame.draw.rect(
+                    self.surface,
+                    clr,
+                    (x * ss + gs, y * ss + gs, ss - 2 * gs, ss - 2 * gs),
+                )
+            else:
+                pygame.draw.rect(
+                    self.surface, clr, (x * ss + gs, y * ss - gs, ss - 2 * gs, ss)
+                )
 
-# Snake speed
-snake_speed = 40
+        if self.dir == [0, -1]:
+            if self.is_tail:
+                pygame.draw.rect(
+                    self.surface,
+                    clr,
+                    (x * ss + gs, y * ss + gs, ss - 2 * gs, ss - 2 * gs),
+                )
+            else:
+                pygame.draw.rect(
+                    self.surface, clr, (x * ss + gs, y * ss + gs, ss - 2 * gs, ss)
+                )
 
-# Font style and size
-smallfont = pygame.font.SysFont("comicsansms", 25)
-medfont = pygame.font.SysFont("comicsansms", 50)
-largefont = pygame.font.SysFont("comicsansms", 80)
-
-# Images
-snake_head_image = pygame.image.load("head_up.png")
-apple_image = pygame.image.load("apple.png")
-
-
-# Function to pause the game and display message
-def pause():
-    # Paused variable
-    paused = True
-
-    # Message to display
-    display_message("Paused", black, -100, size="large")
-    display_message("Press C to continue or Q to quit.", black, 25)
-
-    # Updating the display
-    pygame.display.update()
-
-    # Loop to pause the game
-    # and wait for user input
-    while paused:
-        for event in pygame.event.get():
-            # If user clicks on the close button
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-            # If user presses C, unpause the game
-            # and if presss Q, quit the game
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    pygame.quit()
-                    quit()
-
-                elif event.key == pygame.K_c:
-                    paused = False
-
-        # Game clock
-        clock.tick(5)
-
-
-# Function to display score
-def score(score):
-    text = smallfont.render("Score: " + str(score), True, black)
-    gameDisplay.blit(text, [0, 0])
-
-
-# Function to generate random apple
-def randAppleGen():
-    randAppleX = round(random.randrange(0, display_width - snake_block) / 10.0) * 10.0
-    randAppleY = round(random.randrange(0, display_height - snake_block) / 10.0) * 10.0
-
-    return randAppleX, randAppleY
-
-
-# Function to display controls
-# on screen when game starts
-def game_intro():
-    # Variable to start the game
-    intro = True
-
-    # Loop to display controls
-    while intro:
-        # Loop to get all the events
-        for event in pygame.event.get():
-            # If user clicks on the close button
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-
-            # If user presses C, start the game
-            # and if presss Q, quit the game
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_c:
-                    intro = False
-                elif event.key == pygame.K_q:
-                    pygame.quit()
-                    quit()
-
-        # Background color
-        gameDisplay.fill(white)
-
-        # Displaying the message
-        display_message("Welcome to Snake", green, -100, "large")
-        display_message("The objective of the game is to eat red apples", black, -30)
-        display_message("The more apples you eat, the longer you get", black, 10)
-        display_message("If you run into yourself, or the edges, you die!", black, 50)
-        display_message("Press C to play, P to pause or Q to quit.", black, 180)
-
-        pygame.display.update()
-        clock.tick(15)
-
-
-# Function to display snake on screen
-def snake(snake_block, snake_list):
-    # Displaying the snake head in the direction
-    if direction == "right":
-        head = pygame.transform.rotate(snake_head_image, -90)
-    if direction == "left":
-        head = pygame.transform.rotate(snake_head_image, 90)
-    if direction == "up":
-        head = snake_head_image
-    if direction == "down":
-        head = pygame.transform.rotate(snake_head_image, 180)
-
-    gameDisplay.blit(head, (snake_list[-1][0], snake_list[-1][1]))
-
-    # Displaying the snake body
-    for XnY in snake_list[:-1]:
-        pygame.draw.rect(gameDisplay, green, [XnY[0], XnY[1], snake_block, snake_block])
-
-
-# Function to display message on screen
-# in different sizes
-def text_objects(text, color, size):
-    if size == "small":
-        textSurface = smallfont.render(text, True, color)
-    elif size == "medium":
-        textSurface = medfont.render(text, True, color)
-    elif size == "large":
-        textSurface = largefont.render(text, True, color)
-
-    return textSurface, textSurface.get_rect()
-
-
-# Function to display message on screen
-def display_message(message, color, y_change=0, text_size="small"):
-    textSurf, textRect = text_objects(message, color, text_size)
-    textRect.center = (display_width / 2), (display_height / 2) + y_change
-    gameDisplay.blit(textSurf, textRect)
-
-
-# Main function of the game
-def gameLoop():
-    # Variable to keep track of direction of snake
-    global direction
-    direction = "right"
-
-    # Variable to exit the game
-    gameExit = False
-
-    # Variable to end the game
-    gameOver = False
-
-    # Variables to keep track of snake position
-    lead_x = display_width / 3
-    lead_y = display_height * 2 / 3
-
-    # Variables to keep track of snake movement
-    lead_x_change = 10
-    lead_y_change = 0
-
-    # List to keep track of snake length
-    snakeList = []
-    snakeLength = 1
-
-    # Generating random apple
-    randAppleX, randAppleY = randAppleGen()
-
-    # Loop to run the game until user exits
-    while not gameExit:
-        # Loop to end the game if user dies
-        while gameOver == True:
-            # Background color
-            gameDisplay.fill(white)
-
-            # Displaying the message that user died
-            # and asking user to play again
-            display_message("Game over", red, -50, size="large")
-            display_message(
-                "Press C to play again or Q to quit", black, 50, size="medium"
+        if self.is_apple:
+            pygame.draw.rect(
+                self.surface, clr, (x * ss + gs, y * ss + gs, ss - 2 * gs, ss - 2 * gs)
             )
-            pygame.display.update()
 
-            # Loop to get all the events
-            for event in pygame.event.get():
-                # If user clicks on the close button
-                if event.type == pygame.QUIT:
-                    gameOver = False
-                    gameExit = True
+    def move(self, direction):
+        self.dir = direction
+        self.pos[0] += self.dir[0]
+        self.pos[1] += self.dir[1]
 
-                # If user presses C, start the game
-                # and if presss Q, quit the game
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        gameExit = True
-                        gameOver = False
-                    if event.key == pygame.K_c:
-                        gameLoop()
-
-        # Loop to get all the events
-        for event in pygame.event.get():
-            # If user clicks on the close button
-            if event.type == pygame.QUIT:
-                gameExit = True
-
-            # If user presses any Arrow key
-            # change the direction of snake
-            # and pause the game if user presses P
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and direction != "right":
-                    direction = "left"
-                    lead_x_change = -snake_block
-                    lead_y_change = 0
-                elif event.key == pygame.K_RIGHT and direction != "left":
-                    direction = "right"
-                    lead_x_change = snake_block
-                    lead_y_change = 0
-                elif event.key == pygame.K_UP and direction != "down":
-                    direction = "up"
-                    lead_y_change = -snake_block
-                    lead_x_change = 0
-                elif event.key == pygame.K_DOWN and direction != "up":
-                    direction = "down"
-                    lead_y_change = snake_block
-                    lead_x_change = 0
-                elif event.key == pygame.K_p:
-                    pause()
-
-        # If snake goes out of the screen
+    def hitting_wall(self):
         if (
-            lead_x >= display_width
-            or lead_x < 0
-            or lead_y >= display_height
-            or lead_y < 0
+            (self.pos[0] <= -1)
+            or (self.pos[0] >= ROWS)
+            or (self.pos[1] <= -1)
+            or (self.pos[1] >= ROWS)
         ):
-            gameOver = True
+            return True
+        else:
+            return False
 
-        # Changing the position of snake
-        lead_x += lead_x_change
-        lead_y += lead_y_change
 
-        # Background color
-        gameDisplay.fill(white)
+class Snake:
+    def __init__(self, surface):
+        self.surface = surface
+        self.is_dead = False
+        self.squares_start_pos = [
+            [ROWS // 2 + i, ROWS // 2] for i in range(INITIAL_SNAKE_LENGTH)
+        ]
+        self.turns = {}
+        self.dir = [-1, 0]
+        self.score = 0
+        self.moves_without_eating = 0
+        self.apple = Square(
+            [randrange(ROWS), randrange(ROWS)], self.surface, is_apple=True
+        )
 
-        # Displaying the apple
-        gameDisplay.blit(apple_image, (randAppleX, randAppleY))
+        self.squares = []
+        for pos in self.squares_start_pos:
+            self.squares.append(Square(pos, self.surface))
 
-        # Storing the snake head in a list
-        snakeHead = []
-        snakeHead.append(lead_x)
-        snakeHead.append(lead_y)
-        snakeList.append(snakeHead)
+        self.head = self.squares[0]
+        self.tail = self.squares[-1]
+        self.tail.is_tail = True
 
-        # If snake length is greater than 1
-        # delete the first element of the list
-        # so that the snake length remains constant
-        if len(snakeList) > snakeLength:
-            del snakeList[0]
+        self.path = []
+        self.is_virtual_snake = False
+        self.total_moves = 0
+        self.won_game = False
 
-        # Loop to check if snake head collides with any segment
-        for eachSegment in snakeList[:-1]:
-            # If snake head collides with any segment
-            if eachSegment == snakeHead:
-                # End the game
-                gameOver = True
+    def draw(self):
+        self.apple.draw(APPLE_CLR)
+        self.head.draw(HEAD_CLR)
+        for sqr in self.squares[1:]:
+            if self.is_virtual_snake:
+                sqr.draw(VIRTUAL_SNAKE_CLR)
+            else:
+                sqr.draw()
 
-        # Displaying the snake
-        snake(snake_block, snakeList)
+    def set_direction(self, direction):
+        if direction == "left":
+            if not self.dir == [1, 0]:
+                self.dir = [-1, 0]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+        if direction == "right":
+            if not self.dir == [-1, 0]:
+                self.dir = [1, 0]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+        if direction == "up":
+            if not self.dir == [0, 1]:
+                self.dir = [0, -1]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
+        if direction == "down":
+            if not self.dir == [0, -1]:
+                self.dir = [0, 1]
+                self.turns[self.head.pos[0], self.head.pos[1]] = self.dir
 
-        # Displaying the score
-        score(snakeLength - 1)
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
 
-        # Updating the display
-        pygame.display.update()
+            # Set snake direction using keyboard
+            keys = pygame.key.get_pressed()
 
-        # These conditions check if snake head collides with apple
-        # If it does, generate a new apple and increase the snake length
-        if lead_x >= randAppleX and lead_x <= randAppleX + snake_block:
-            if lead_y >= randAppleY and lead_y <= randAppleY + snake_block:
-                randAppleX, randAppleY = randAppleGen()
-                snakeLength += 1
+            if keys[pygame.K_LEFT]:
+                self.set_direction("left")
 
-        elif (
-            lead_x + snake_block >= randAppleX
-            and lead_x + snake_block <= randAppleX + snake_block
+            elif keys[pygame.K_RIGHT]:
+                self.set_direction("right")
+
+            elif keys[pygame.K_UP]:
+                self.set_direction("up")
+
+            elif keys[pygame.K_DOWN]:
+                self.set_direction("down")
+
+    def move(self):
+        for j, sqr in enumerate(self.squares):
+            p = (sqr.pos[0], sqr.pos[1])
+            if p in self.turns:
+                turn = self.turns[p]
+                sqr.move([turn[0], turn[1]])
+                if j == len(self.squares) - 1:
+                    self.turns.pop(p)
+            else:
+                sqr.move(sqr.dir)
+        self.moves_without_eating += 1
+
+    def add_square(self):
+        self.squares[-1].is_tail = False
+        tail = self.squares[-1]  # Tail before adding new square
+
+        direction = tail.dir
+        if direction == [1, 0]:
+            self.squares.append(Square([tail.pos[0] - 1, tail.pos[1]], self.surface))
+        if direction == [-1, 0]:
+            self.squares.append(Square([tail.pos[0] + 1, tail.pos[1]], self.surface))
+        if direction == [0, 1]:
+            self.squares.append(Square([tail.pos[0], tail.pos[1] - 1], self.surface))
+        if direction == [0, -1]:
+            self.squares.append(Square([tail.pos[0], tail.pos[1] + 1], self.surface))
+
+        self.squares[-1].dir = direction
+        self.squares[-1].is_tail = True  # Tail after adding new square
+
+    def reset(self):
+        self.__init__(self.surface)
+
+    def hitting_self(self):
+        for sqr in self.squares[1:]:
+            if sqr.pos == self.head.pos:
+                return True
+
+    def generate_apple(self):
+        self.apple = Square(
+            [randrange(ROWS), randrange(ROWS)], self.surface, is_apple=True
+        )
+        if not self.is_position_free(self.apple.pos):
+            self.generate_apple()
+
+    def eating_apple(self):
+        if (
+            self.head.pos == self.apple.pos
+            and not self.is_virtual_snake
+            and not self.won_game
         ):
-            if (
-                lead_y + snake_block >= randAppleY
-                and lead_y + snake_block <= randAppleY + snake_block
-            ):
-                randAppleX, randAppleY = randAppleGen()
-                snakeLength += 1
+            self.generate_apple()
+            self.moves_without_eating = 0
+            self.score += 1
+            return True
 
-        # Setting the frame rate
-        clock.tick(snake_speed)
+    def go_to(self, position):  # Set head direction to target position
+        if self.head.pos[0] - 1 == position[0]:
+            self.set_direction("left")
+        if self.head.pos[0] + 1 == position[0]:
+            self.set_direction("right")
+        if self.head.pos[1] - 1 == position[1]:
+            self.set_direction("up")
+        if self.head.pos[1] + 1 == position[1]:
+            self.set_direction("down")
 
-    # Quiting the game
-    pygame.quit()
-    quit()
+    def is_position_free(self, position):
+        if (
+            position[0] >= ROWS
+            or position[0] < 0
+            or position[1] >= ROWS
+            or position[1] < 0
+        ):
+            return False
+        for sqr in self.squares:
+            if sqr.pos == position:
+                return False
+        return True
 
+    # Thuật BFS
+    def bfs(self, s, e):  # Tìm đường ngắn nhất từ s đến e
+        q = [s]  # queue, ban đầu chứa điểm xuất phát
+        visited = {
+            tuple(pos): False for pos in GRID
+        }  # dictionary kiểm tra ô đó đã được xét chưa, với key là tuple tọa độ ô và value là true hoặc false
 
-# Calling the main function
-game_intro()
-gameLoop()
+        visited[s] = True
+
+        # với mỗi ô đi qua ta lưu lại ô trước đó để lưu lại đường đi
+        prev = {tuple(pos): None for pos in GRID}
+
+        while q:  # while queue còn phần tử
+            node = q.pop(0)
+            neighbors = ADJACENCY_DICT[node]
+            # đẩy 4 ô hàng xóm của phần tử đầu vào q (nếu ở đó không có thân rắn và chưa được đi qua)
+            for next_node in neighbors:
+                if self.is_position_free(next_node) and not visited[tuple(next_node)]:
+                    q.append(tuple(next_node))
+                    visited[tuple(next_node)] = True
+                    prev[tuple(next_node)] = node
+
+        path = list()
+        p_node = e  # Starting from end node, we will find the parent node of each node
+
+        start_node_found = False
+        while not start_node_found:
+            if prev[p_node] is None:
+                return []
+            p_node = prev[p_node]
+            if p_node == s:
+                path.append(e)
+                return path
+            path.insert(0, p_node)
+
+        return []  # không có đường đi
+
+    def create_virtual_snake(
+        self,
+    ):  # Creates a copy of snake (same size, same position, etc..)
+        v_snake = Snake(self.surface)
+        for i in range(len(self.squares) - len(v_snake.squares)):
+            v_snake.add_square()
+
+        for i, sqr in enumerate(v_snake.squares):
+            sqr.pos = deepcopy(self.squares[i].pos)
+            sqr.dir = deepcopy(self.squares[i].dir)
+
+        v_snake.dir = deepcopy(self.dir)
+        v_snake.turns = deepcopy(self.turns)
+        v_snake.apple.pos = deepcopy(self.apple.pos)
+        v_snake.apple.is_apple = True
+        v_snake.is_virtual_snake = True
+
+        return v_snake
+
+    def get_path_to_tail(self):
+        tail_pos = deepcopy(self.squares[-1].pos)
+        self.squares.pop(-1)
+        path = self.bfs(tuple(self.head.pos), tuple(tail_pos))
+        self.add_square()
+        return path
+
+    def get_available_neighbors(self, pos):
+        valid_neighbors = []
+        neighbors = get_neighbors(tuple(pos))
+        for n in neighbors:
+            if self.is_position_free(n) and self.apple.pos != n:
+                valid_neighbors.append(tuple(n))
+        return valid_neighbors
+
+    def longest_path_to_tail(self):
+        neighbors = self.get_available_neighbors(self.head.pos)
+        path = []
+        if neighbors:
+            dis = -9999
+            for n in neighbors:
+                if distance(n, self.squares[-1].pos) > dis:
+                    v_snake = self.create_virtual_snake()
+                    v_snake.go_to(n)
+                    v_snake.move()
+                    if v_snake.eating_apple():
+                        v_snake.add_square()
+                    if v_snake.get_path_to_tail():
+                        path.append(n)
+                        dis = distance(n, self.squares[-1].pos)
+            if path:
+                return [path[-1]]
+
+    def any_safe_move(self):
+        neighbors = self.get_available_neighbors(self.head.pos)
+        path = []
+        if neighbors:
+            path.append(neighbors[randrange(len(neighbors))])
+            v_snake = self.create_virtual_snake()
+            for move in path:
+                v_snake.go_to(move)
+                v_snake.move()
+            if v_snake.get_path_to_tail():
+                return path
+            else:
+                return self.get_path_to_tail()
+
+    def set_path(self):
+        # If there is only 1 apple left for snake to win and it's adjacent to head
+        if self.score == SNAKE_MAX_LENGTH - 1 and self.apple.pos in get_neighbors(
+            self.head.pos
+        ):
+            winning_path = [tuple(self.apple.pos)]
+            print("Snake is about to win..")
+            return winning_path
+
+        v_snake = self.create_virtual_snake()
+
+        # Let the virtual snake check if path to apple is available
+        path_1 = v_snake.bfs(tuple(v_snake.head.pos), tuple(v_snake.apple.pos))
+
+        # This will be the path to virtual snake tail after it follows path_1
+        path_2 = []
+
+        if path_1:
+            for pos in path_1:
+                v_snake.go_to(pos)
+                v_snake.move()
+
+            v_snake.add_square()  # Because it will eat an apple
+            path_2 = v_snake.get_path_to_tail()
+
+        # v_snake.draw()
+
+        if path_2:  # If there is a path between v_snake and it's tail
+            return path_1  # Choose BFS path to apple (Fastest and shortest path)
+
+        # If path_1 or path_2 not available, test these 3 conditions:
+        # 1- Make sure that the longest path to tail is available
+        # 2- If score is even, choose longest_path_to_tail() to follow the tail, if odd use any_safe_move()
+        # 3- Change the follow tail method if the snake gets stuck in a loop
+        if (
+            self.longest_path_to_tail()
+            and self.score % 2 == 0
+            and self.moves_without_eating < MAX_MOVES_WITHOUT_EATING / 2
+        ):
+            # Choose longest path to tail
+            return self.longest_path_to_tail()
+
+        # Play any possible safe move and make sure path to tail is available
+        if self.any_safe_move():
+            return self.any_safe_move()
+
+        # If path to tail is available
+        if self.get_path_to_tail():
+            # Choose shortest path to tail
+            return self.get_path_to_tail()
+
+        # Snake couldn't find a path and will probably die
+        print("No available path, snake in danger!")
+
+    def update(self):
+        self.handle_events()
+
+        self.path = self.set_path()
+        if self.path:
+            self.go_to(self.path[0])
+
+        self.draw()
+        self.move()
+
+        if self.score == ROWS * ROWS - INITIAL_SNAKE_LENGTH:  # If snake wins the game
+            self.won_game = True
+
+            print("Snake won the game after {} moves".format(self.total_moves))
+
+            pygame.time.wait(1000 * WAIT_SECONDS_AFTER_WIN)
+            return 1
+
+        self.total_moves += 1
+
+        if self.hitting_self() or self.head.hitting_wall():
+            print("Snake is dead, trying again..")
+            self.is_dead = True
+            self.reset()
+
+        if self.moves_without_eating == MAX_MOVES_WITHOUT_EATING:
+            self.is_dead = True
+            print("Snake got stuck, trying again..")
+            self.reset()
+
+        if self.eating_apple():
+            self.add_square()
