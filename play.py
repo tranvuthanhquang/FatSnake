@@ -1,6 +1,6 @@
 from snake import *
 from os import environ
-
+import pygame
 
 def draw_screen(surface):
     surface.fill(SURFACE_CLR)
